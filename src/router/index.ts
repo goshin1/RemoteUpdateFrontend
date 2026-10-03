@@ -97,6 +97,12 @@ const router = createRouter({
       meta: { title: '사용자 관리', role: 'ADMIN' },
     },
     {
+      path: '/admin/allowed-ips',
+      name: 'allowed-ips',
+      component: () => import('@/views/AllowedIpView.vue'),
+      meta: { title: '허용 IP', role: 'ADMIN' },
+    },
+    {
       path: '/updates/:updateId(\\d+)',
       name: 'update',
       component: () => import('@/views/UpdateDetailView.vue'),

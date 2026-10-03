@@ -24,6 +24,10 @@ export interface Me {
   name: string
   role: Role
   mustChangePassword: boolean
+  /** 서버가 본 접속 IP */
+  clientIp: string
+  /** 지금 IP 에서 관리 기능(등록·수정·관리자 메뉴)을 쓸 수 있는지 */
+  managementAllowed: boolean
 }
 
 export interface Project {
@@ -127,4 +131,22 @@ export interface UserOption {
 export interface UploadPolicy {
   allowedExtensions: string[]
   maxFileSizeBytes: number
+}
+
+export interface AllowedIp {
+  id: number
+  ipOrCidr: string
+  description: string | null
+  enabled: boolean
+  createdByName: string | null
+  createdAt: string
+}
+
+export interface AllowedIpOverview {
+  /** 서버 설정 IP_FILTER_ENABLED */
+  filterEnabled: boolean
+  alwaysAllowLocalhost: boolean
+  clientIp: string
+  clientAllowed: boolean
+  items: AllowedIp[]
 }
