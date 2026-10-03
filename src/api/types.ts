@@ -63,3 +63,68 @@ export interface Guide {
   createdAt: string
   updatedAt: string
 }
+
+/** 변경 이력. before/after 는 그 시점의 업데이트 값 (CREATE 는 before 가 null) */
+export interface UpdateSnapshot {
+  version: string
+  title: string
+  content: string | null
+  status: UpdateStatus
+  fileName: string
+  fileSize: number
+  checksum: string
+}
+
+export interface UpdateHistory {
+  id: number
+  action: HistoryAction
+  changedById: number
+  changedByName: string
+  before: UpdateSnapshot | null
+  after: UpdateSnapshot | null
+  changedAt: string
+}
+
+export interface DownloadHistory {
+  id: number
+  projectId: number
+  projectName: string
+  updateId: number
+  version: string
+  fileName: string
+  userId: number
+  downloaderName: string
+  clientIp: string
+  downloadedAt: string
+}
+
+/** 관리자 화면의 사용자 정보 */
+export interface AdminUser {
+  id: number
+  email: string
+  name: string
+  role: Role
+  enabled: boolean
+  mustChangePassword: boolean
+  locked: boolean
+  lockedUntil: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+/** 사용자 등록·비밀번호 초기화 결과. temporaryPassword 는 이 응답에서만 볼 수 있음 */
+export interface TemporaryPasswordResult {
+  user: AdminUser
+  temporaryPassword: string
+}
+
+export interface UserOption {
+  id: number
+  name: string
+  email: string
+}
+
+export interface UploadPolicy {
+  allowedExtensions: string[]
+  maxFileSizeBytes: number
+}

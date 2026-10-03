@@ -22,6 +22,9 @@ async function logout() {
         <RouterLink :to="{ name: 'projects' }" class="brand">RemoteUpdate</RouterLink>
         <nav v-if="!auth.mustChangePassword" class="nav">
           <RouterLink :to="{ name: 'projects' }">프로젝트</RouterLink>
+          <!-- 메뉴 숨김은 "편의"일 뿐, 실제 권한 검사는 서버가 한다 -->
+          <RouterLink v-if="auth.hasRole('DEVELOPER')" :to="{ name: 'downloads' }">다운로드 이력</RouterLink>
+          <RouterLink v-if="auth.hasRole('ADMIN')" :to="{ name: 'users' }">사용자 관리</RouterLink>
         </nav>
         <div v-if="auth.me" class="user">
           <span class="user-name">{{ auth.me.name }}</span>

@@ -4,6 +4,9 @@ import { RouterLink } from 'vue-router'
 import { errorMessage } from '@/api/http'
 import { projectApi } from '@/api/projects'
 import type { Project } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
 
 const projects = ref<Project[]>([])
 const loading = ref(true)
@@ -26,6 +29,9 @@ onMounted(async () => {
       <h1>프로젝트</h1>
       <p class="muted">현장에 맞는 프로젝트를 선택해 초기 세팅 가이드와 업데이트 파일을 확인하세요.</p>
     </div>
+    <RouterLink v-if="auth.hasRole('ADMIN')" :to="{ name: 'project-new' }" class="btn btn-primary">
+      프로젝트 등록
+    </RouterLink>
   </div>
 
   <div v-if="error" class="alert alert-error">{{ error }}</div>

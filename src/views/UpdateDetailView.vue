@@ -1,28 +1,68 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { errorMessage } from '@/api/http'
-import { projectApi, updateApi } from '@/api/projects'
-import type { Project, Update } from '@/api/types'
+import { projectApi } from '@/api/projects'
+import type { Project, Update, UpdateHistory } from '@/api/types'
+import { updateApi } from '@/api/updates'
 import ChecksumField from '@/components/ChecksumField.vue'
+import HistoryList from '@/components/HistoryList.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { useAuthStore } from '@/stores/auth'
 import { formatBytes, formatDateTime } from '@/utils/format'
 
+/**
+ * 업데이트 상세.
+ * - 모두: 정보, 다운로드, 체크섬 확인 안내
+ * - 개발자 이상: 수정, 배포 중단/재개, 변경 이력, 이 업데이트의 다운로드 이력 바로가기
+ */
 const props = defineProps<{ updateId: number }>()
+const auth = useAuthStore()
+const isDeveloper = computed(() => auth.hasRole('DEVELOPER'))
 
 const update = ref<Update | null>(null)
 const project = ref<Project | null>(null)
+const history = ref<UpdateHistory[]>([])
 const error = ref('')
+const actionError = ref('')
+const changing = ref(false)
+
+async function loadHistory() {
+  if (isDeveloper.value) {
+    history.value = await updateApi.history(props.updateId)
+  }
+}
 
 onMounted(async () => {
   try {
     update.value = await updateApi.get(props.updateId)
     project.value = await projectApi.get(update.value.projectId)
     document.title = `${project.value.name} ${update.value.version} · RemoteUpdate`
+    await loadHistory()
   } catch (e) {
     error.value = errorMessage(e)
   }
 })
+
+/** 배포 중단(다운로드 차단) / 재개 */
+async function toggleStatus() {
+  if (!update.value) return
+  const disabling = update.value.status === 'ACTIVE'
+  const message = disabling
+    ? `${update.value.version} 배포를 중단할까요?\n중단하면 아무도 이 파일을 받을 수 없고, 직원 화면에서 사라집니다.`
+    : `${update.value.version} 배포를 다시 시작할까요?`
+  if (!window.confirm(message)) return
+  changing.value = true
+  actionError.value = ''
+  try {
+    update.value = await updateApi.changeStatus(update.value.id, disabling ? 'DISABLED' : 'ACTIVE')
+    await loadHistory()
+  } catch (e) {
+    actionError.value = errorMessage(e)
+  } finally {
+    changing.value = false
+  }
+}
 </script>
 
 <template>
@@ -51,6 +91,17 @@ onMounted(async () => {
         다운로드 ({{ formatBytes(update.fileSize) }})
       </a>
     </div>
+
+    <!-- 개발자 도구 -->
+    <div v-if="isDeveloper" class="dev-bar">
+      <RouterLink :to="{ name: 'update-edit', params: { updateId: update.id } }" class="btn btn-sm">수정</RouterLink>
+      <button type="button" class="btn btn-sm" :class="{ danger: update.status === 'ACTIVE' }" :disabled="changing"
+        @click="toggleStatus">
+        {{ update.status === 'ACTIVE' ? '배포 중단' : '배포 재개' }}
+      </button>
+      <RouterLink :to="{ name: 'downloads', query: { updateId: update.id } }" class="btn btn-sm">다운로드 이력</RouterLink>
+    </div>
+    <div v-if="actionError" class="alert alert-error" role="alert">{{ actionError }}</div>
 
     <div v-if="update.status === 'DISABLED'" class="alert alert-warning">
       배포가 중단된 업데이트라 다운로드할 수 없습니다.
@@ -82,6 +133,11 @@ onMounted(async () => {
       </p>
       <pre class="command"><code>Get-FileHash "{{ update.fileName }}" -Algorithm SHA256</code></pre>
     </section>
+
+    <section v-if="isDeveloper" class="section">
+      <h2>변경 이력</h2>
+      <HistoryList :items="history" />
+    </section>
   </template>
 
   <p v-else class="muted">불러오는 중...</p>
@@ -102,6 +158,21 @@ onMounted(async () => {
   margin-top: 6px !important;
   font-size: 17px;
   color: var(--text-h);
+}
+
+.dev-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.btn.danger {
+  color: var(--danger);
 }
 
 .info {

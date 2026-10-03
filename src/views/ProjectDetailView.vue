@@ -2,7 +2,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { errorMessage } from '@/api/http'
-import { guideApi, projectApi, updateApi } from '@/api/projects'
+import { guideApi } from '@/api/guides'
+import { projectApi } from '@/api/projects'
+import { updateApi } from '@/api/updates'
 import type { Guide, PageResponse, Project, Update, UpdateStatus } from '@/api/types'
 import PaginationBar from '@/components/PaginationBar.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
@@ -86,6 +88,8 @@ onMounted(() => {
         <h1>{{ project.name }}</h1>
         <p v-if="project.description" class="muted pre">{{ project.description }}</p>
       </div>
+      <RouterLink v-if="auth.hasRole('ADMIN')" :to="{ name: 'project-edit', params: { projectId: project.id } }"
+        class="btn">프로젝트 수정</RouterLink>
     </div>
 
     <!-- 최신 버전 -->
@@ -108,6 +112,8 @@ onMounted(() => {
     <section class="section">
       <div class="section-header">
         <h2>초기 세팅 가이드</h2>
+        <RouterLink v-if="isDeveloper" :to="{ name: 'guide-new', params: { projectId: project.id } }"
+          class="btn btn-sm">가이드 등록</RouterLink>
       </div>
       <div v-if="guides.length === 0" class="empty">등록된 가이드가 없습니다.</div>
       <ul v-else class="guide-list">
@@ -126,13 +132,18 @@ onMounted(() => {
     <section class="section">
       <div class="section-header">
         <h2>업데이트</h2>
-        <div v-if="isDeveloper" class="field inline">
-          <label for="status" class="sr-only">상태</label>
-          <select id="status" v-model="statusFilter">
-            <option value="">전체 상태</option>
-            <option value="ACTIVE">배포 중</option>
-            <option value="DISABLED">중단됨</option>
-          </select>
+        <div v-if="isDeveloper" class="dev-tools">
+          <div class="field inline">
+            <label for="status" class="sr-only">상태</label>
+            <select id="status" v-model="statusFilter">
+              <option value="">전체 상태</option>
+              <option value="ACTIVE">배포 중</option>
+              <option value="DISABLED">중단됨</option>
+            </select>
+          </div>
+          <RouterLink :to="{ name: 'update-new', params: { projectId: project.id } }" class="btn btn-sm btn-primary">
+            업데이트 등록
+          </RouterLink>
         </div>
       </div>
 
@@ -255,6 +266,12 @@ onMounted(() => {
 
 .field.inline {
   margin: 0;
+}
+
+.dev-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .field.inline select {

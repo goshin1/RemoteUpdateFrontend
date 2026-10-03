@@ -2,12 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { errorMessage } from '@/api/http'
-import { guideApi, projectApi } from '@/api/projects'
+import { guideApi } from '@/api/guides'
+import { projectApi } from '@/api/projects'
 import type { Guide, Project } from '@/api/types'
 import { formatBytes, formatDateTime } from '@/utils/format'
 import { renderMarkdown } from '@/utils/markdown'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{ guideId: number }>()
+const auth = useAuthStore()
 
 const guide = ref<Guide | null>(null)
 const project = ref<Project | null>(null)
@@ -46,9 +49,13 @@ onMounted(async () => {
         <h1>{{ guide.title }}</h1>
         <p class="muted small">{{ guide.createdByName }} · 수정 {{ formatDateTime(guide.updatedAt) }}</p>
       </div>
-      <a v-if="guide.hasAttachment" :href="guideApi.attachmentUrl(guide.id)" class="btn btn-primary">
-        첨부 파일 받기 ({{ formatBytes(guide.fileSize) }})
-      </a>
+      <div class="header-actions">
+        <RouterLink v-if="auth.hasRole('DEVELOPER')" :to="{ name: 'guide-edit', params: { guideId: guide.id } }"
+          class="btn">수정</RouterLink>
+        <a v-if="guide.hasAttachment" :href="guideApi.attachmentUrl(guide.id)" class="btn btn-primary">
+          첨부 파일 받기 ({{ formatBytes(guide.fileSize) }})
+        </a>
+      </div>
     </div>
 
     <article v-if="html" class="card markdown" v-html="html" />
@@ -59,6 +66,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .small {
   font-size: 13px;
   margin-top: 4px !important;
