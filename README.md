@@ -37,6 +37,8 @@ npm run build      # 타입 검사(vue-tsc) + dist 폴더 생성
 
 ## 화면
 
+> 화면별 상세 사용법(그림 포함)은 **[사용 설명서 docs/user-manual.md](docs/user-manual.md)** 를 보세요.
+
 | 경로 | 화면 | 권한 |
 |---|---|---|
 | `/login` | 로그인 | 공개 |
