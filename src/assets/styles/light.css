@@ -1,0 +1,49 @@
+/* 라이트 테마 색상 변수. dark.css 와 같은 이름을 쓰고 값만 다르다 */
+body[data-theme='light'] {
+  color-scheme: light;
+
+  /* 배경 */
+  --color-bg-page: #f2f5fa;
+  --color-bg-panel: #ffffff;
+  --color-bg-input: #ffffff;
+  --color-bg-subtle: #f1f4f9; /* 표 머리글, hover, 코드 블록 */
+  --color-bg-active: #e4e9f2;
+  --color-bg-disabled: #eef1f6;
+  --color-bg-page-glow:
+    radial-gradient(1100px 560px at 8% -12%, rgb(37 99 235 / 7%), transparent 62%),
+    radial-gradient(900px 520px at 100% -8%, rgb(124 58 237 / 5%), transparent 60%);
+
+  /* 텍스트 */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #5b6678;
+  --color-text-disabled: #94a0b2;
+  --color-text-on-primary: #ffffff;
+
+  /* 경계선 */
+  --color-border: #dce2ec;
+  --color-border-strong: #c2cbd9;
+
+  /* 강조 */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-soft: #eaf1ff;
+  --color-focus-ring: rgb(37 99 235 / 22%);
+
+  /* 상태 */
+  --color-success: #15803d;
+  --color-success-soft: #ebfaf0;
+  --color-warning: #b45309;
+  --color-warning-soft: #fff6e5;
+  --color-error: #dc2626;
+  --color-error-soft: #fef1f1;
+
+  /* 효과 */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 5%), 0 4px 16px rgb(15 23 42 / 5%);
+  --shadow-dialog: 0 24px 60px rgb(15 23 42 / 22%);
+  --color-overlay: rgb(15 23 42 / 40%);
+  --glass-bg: rgb(255 255 255 / 80%);
+  --glass-header-bg: rgb(255 255 255 / 76%);
+  --glass-border: rgb(15 23 42 / 8%);
+  --glass-blur: 12px;
+}

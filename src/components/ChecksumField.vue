@@ -33,8 +33,8 @@ async function copy() {
   flex: 1;
   min-width: 0;
   padding: 6px 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 13px;
   overflow-wrap: anywhere;

@@ -207,8 +207,8 @@ onMounted(() => {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  border-color: var(--accent);
-  background: var(--accent-bg);
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 
 .latest-info {
@@ -225,7 +225,7 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   align-items: baseline;
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
 .version {
@@ -241,7 +241,8 @@ onMounted(() => {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--border);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
 }
 
@@ -251,7 +252,7 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
   flex-wrap: wrap;
 }
 

@@ -78,7 +78,8 @@ function changes(item: UpdateHistory) {
 }
 
 .entry {
-  border: 1px solid var(--border);
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: 12px 16px;
 }
@@ -102,7 +103,7 @@ function changes(item: UpdateHistory) {
 .diff th {
   width: 80px;
   text-align: left;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   font-weight: 500;
   padding: 4px 8px 4px 0;
   vertical-align: top;
@@ -116,17 +117,17 @@ function changes(item: UpdateHistory) {
 }
 
 .before {
-  color: var(--danger);
-  background: var(--danger-bg);
+  color: var(--color-error);
+  background: var(--color-error-soft);
   text-decoration: line-through;
 }
 
 .after {
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
 .before + .after {
-  color: var(--success);
-  background: var(--success-bg);
+  color: var(--color-success);
+  background: var(--color-success-soft);
 }
 </style>

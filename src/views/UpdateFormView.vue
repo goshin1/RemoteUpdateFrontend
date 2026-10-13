@@ -126,11 +126,6 @@ async function submit() {
   max-width: 720px;
 }
 
-.field input:disabled {
-  background: var(--surface);
-  color: var(--text-muted);
-}
-
 .actions {
   display: flex;
   justify-content: flex-end;

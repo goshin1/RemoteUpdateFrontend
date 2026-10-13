@@ -30,7 +30,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgb(17 24 39 / 40%);
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
 }
 
 .dialog {
@@ -38,6 +40,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   max-width: 440px;
   max-height: calc(100vh - 32px);
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 20%);
+  background: var(--color-bg-panel);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-dialog);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 </style>

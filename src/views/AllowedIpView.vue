@@ -190,11 +190,11 @@ onMounted(load)
 }
 
 .on {
-  color: var(--success);
+  color: var(--color-success);
 }
 
 .off {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
 }
 
 .hint {
@@ -227,7 +227,7 @@ onMounted(load)
   justify-content: flex-end;
 }
 
-.btn.danger {
-  color: var(--danger);
+.btn.danger:not(:disabled) {
+  color: var(--color-error);
 }
 </style>

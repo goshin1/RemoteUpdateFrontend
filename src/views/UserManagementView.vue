@@ -304,7 +304,7 @@ onMounted(load)
 }
 
 tr.inactive td {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
 }
 
 .hint {

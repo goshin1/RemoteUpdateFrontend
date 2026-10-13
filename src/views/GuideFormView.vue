@@ -139,7 +139,7 @@ textarea {
 .label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
 .preview {
@@ -147,9 +147,9 @@ textarea {
   max-height: 440px;
   overflow-y: auto;
   padding: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--color-bg-subtle);
 }
 
 .actions {

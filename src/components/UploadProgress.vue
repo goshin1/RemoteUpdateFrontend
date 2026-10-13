@@ -14,8 +14,8 @@ defineProps<{ percent: number }>()
 .progress {
   position: relative;
   height: 28px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: 16px;
@@ -23,8 +23,8 @@ defineProps<{ percent: number }>()
 
 .bar {
   height: 100%;
-  background: var(--accent-bg);
-  border-right: 2px solid var(--accent);
+  background: var(--color-primary-soft);
+  border-right: 2px solid var(--color-primary);
   transition: width 0.2s;
 }
 
@@ -35,6 +35,6 @@ defineProps<{ percent: number }>()
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 </style>

@@ -157,7 +157,7 @@ async function toggleStatus() {
 .subtitle {
   margin-top: 6px !important;
   font-size: 17px;
-  color: var(--text-h);
+  color: var(--color-text-primary);
 }
 
 .dev-bar {
@@ -166,13 +166,13 @@ async function toggleStatus() {
   flex-wrap: wrap;
   padding: 10px 12px;
   margin-bottom: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
 }
 
-.btn.danger {
-  color: var(--danger);
+.btn.danger:not(:disabled) {
+  color: var(--color-error);
 }
 
 .info {
@@ -183,12 +183,12 @@ async function toggleStatus() {
 }
 
 .info dt {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
 }
 
 .info dd {
   margin: 0;
-  color: var(--text-h);
+  color: var(--color-text-primary);
   overflow-wrap: anywhere;
 }
 
@@ -204,8 +204,8 @@ async function toggleStatus() {
 .command {
   margin: 0;
   padding: 10px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   overflow-x: auto;
   font-size: 13px;

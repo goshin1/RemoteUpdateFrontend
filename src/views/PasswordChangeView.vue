@@ -80,10 +80,10 @@ async function submit() {
 }
 
 .hint.ok {
-  color: var(--success);
+  color: var(--color-success);
 }
 
 .hint.error {
-  color: var(--danger);
+  color: var(--color-error);
 }
 </style>

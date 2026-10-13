@@ -68,7 +68,6 @@ async function submit() {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: var(--surface);
 }
 
 .login-card {

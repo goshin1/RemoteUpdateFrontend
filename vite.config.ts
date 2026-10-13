@@ -16,7 +16,7 @@ export default defineConfig({
     // 브라우저 입장에서는 같은 출처이므로 세션 쿠키·CSRF 쿠키가 그대로 동작하고 CORS 설정이 필요 없음.
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: false,
       },
     },

@@ -66,7 +66,7 @@ onMounted(async () => {
 }
 
 .project-card:hover {
-  border-color: var(--accent);
+  border-color: var(--color-primary);
 }
 
 .project-card h2 {

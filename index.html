@@ -7,6 +7,16 @@
     <title>RemoteUpdate</title>
   </head>
   <body>
+    <!-- 첫 렌더 전에 저장된 테마를 적용해 깜빡임을 막는다 (키·기본값은 src/stores/ui.ts 와 같게) -->
+    <script>
+      ;(function () {
+        var theme = null
+        try {
+          theme = localStorage.getItem('theme')
+        } catch (e) {}
+        document.body.setAttribute('data-theme', theme === 'light' || theme === 'dark' ? theme : 'dark')
+      })()
+    </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
