@@ -335,10 +335,47 @@ onMounted(load)
   font-size: 12px;
 }
 
+/* "기간 변경" 선택: 옆의 .btn-sm 버튼과 같은 모양 (전역 select 스타일은 .field 안에만 적용되므로 따로 지정) */
 .expiry-select {
+  appearance: none;
   width: auto;
-  padding: 4px 8px;
+  padding: 4px 28px 4px 10px;
+  font: inherit;
   font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-panel);
+  /* 화살표(▼)를 두 개의 삼각형 그라데이션으로 그림 → 테마 색 변수를 그대로 쓸 수 있음 */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.expiry-select:hover {
+  border-color: var(--color-text-muted);
+}
+
+.expiry-select:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+/* 펼친 목록도 테마 색으로 (브라우저 기본은 흰 배경) */
+.expiry-select option {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-panel);
 }
 
 .btn.danger:not(:disabled) {
