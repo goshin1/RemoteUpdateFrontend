@@ -22,21 +22,21 @@ async function onChange(event: Event) {
   if (error.value && input.value) input.value.value = ''
 }
 
-async function dummyFile(){
-  const fileInput = document.getElementById(props.id) as HTMLInputElement;
-  const myFile = new File(["dummy content"], "example.zip", { type: "application/zip" });
-  const dataTransfer = new DataTransfer();
-  dataTransfer.items.add(myFile);
-  fileInput.files = dataTransfer.files;
-
-  const file = fileInput.files?.[0] ?? null
-
-  await ready() // 화면을 열자마자 파일을 고른 경우, 서버의 업로드 정책을 받은 뒤에 검사
-  error.value = file ? check(file) : ''
-  model.value = file && !error.value ? file : null
-  if (error.value && input.value) input.value.value = ''
-
-}
+// async function dummyFile(){
+//   const fileInput = document.getElementById(props.id) as HTMLInputElement;
+//   const myFile = new File(["dummy content"], "example.zip", { type: "application/zip" });
+//   const dataTransfer = new DataTransfer();
+//   dataTransfer.items.add(myFile);
+//   fileInput.files = dataTransfer.files;
+//
+//   const file = fileInput.files?.[0] ?? null
+//
+//   await ready() // 화면을 열자마자 파일을 고른 경우, 서버의 업로드 정책을 받은 뒤에 검사
+//   error.value = file ? check(file) : ''
+//   model.value = file && !error.value ? file : null
+//   if (error.value && input.value) input.value.value = ''
+//
+// }
 
 </script>
 
@@ -44,7 +44,7 @@ async function dummyFile(){
   <div class="picker">
     <!-- 실사용에서는 @change="onChange" 등록 -->
     <!-- 테스트 용도로 더미 파일 삽입 -->
-    <input :id="id" ref="input" type="file" :accept="accept()" :required="required" @click="dummyFile" />
+    <input :id="id" ref="input" type="file" :accept="accept()" :required="required" @change="onChange" />
     <span v-if="model" class="hint">{{ model.name }} · {{ formatBytes(model.size) }}</span>
     <span v-else-if="policy" class="hint">
       허용: {{ policy.allowedExtensions.join(', ') }} · 최대 {{ formatBytes(policy.maxFileSizeBytes) }}

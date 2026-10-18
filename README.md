@@ -16,7 +16,7 @@
 
 ## 빠른 시작 (개발)
 
-Backend 를 먼저 실행해 두세요 (`http://localhost:8081`).
+Backend 를 먼저 실행해 두세요 (`http://localhost:8080`).
 
 ```powershell
 npm install
@@ -24,7 +24,7 @@ npm run dev
 ```
 
 - 접속: `http://localhost:5173`
-- `/api` 요청은 Vite 가 `localhost:8081` 으로 전달합니다 (`vite.config.ts`). 브라우저 입장에서 같은 출처라 세션 쿠키·CSRF 가 그대로 동작하고 CORS 설정이 필요 없습니다.
+- `/api` 요청은 Vite 가 `localhost:8080` 으로 전달합니다 (`vite.config.ts`). 브라우저 입장에서 같은 출처라 세션 쿠키·CSRF 가 그대로 동작하고 CORS 설정이 필요 없습니다.
 - 최초 관리자: `admin@onpoom.co.kr` / `ChangeMe!2026` (첫 로그인 때 비밀번호 변경)
 
 ### 빌드

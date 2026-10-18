@@ -31,7 +31,13 @@ export function ensureCsrfCookie(): Promise<unknown> {
   if (hasCsrfCookie()) {
     return Promise.resolve()
   }
-  csrfRequest ??= axios.get('/api/v1/auth/csrf', { withCredentials: true }).finally(() => {
+  // http 인스턴스가 아닌 axios 로 직접 요청하므로, IP 차단 응답도 여기서 따로 처리
+  csrfRequest ??= axios.get('/api/v1/auth/csrf', { withCredentials: true }).catch((e: unknown) => {
+    if (axios.isAxiosError<ApiError>(e) && e.response?.data?.code === 'IP_NOT_ALLOWED') {
+      onIpBlocked?.(e.response.data.clientIp)
+    }
+    throw e
+  }).finally(() => {
     csrfRequest = null
   })
   return csrfRequest
@@ -44,6 +50,14 @@ http.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   }
   return config
 })
+
+/** 허용되지 않은 IP(IP_NOT_ALLOWED) 응답을 받았을 때 처리할 함수 (main.ts 에서 등록) */
+type IpBlockedHandler = (clientIp: string | undefined) => void
+let onIpBlocked: IpBlockedHandler | null = null
+
+export function setIpBlockedHandler(handler: IpBlockedHandler) {
+  onIpBlocked = handler
+}
 
 /** 인증 관련 응답을 받았을 때 처리할 함수 (router 에서 등록 — 순환 참조 방지) */
 type AuthFailureHandler = (error: ApiError, status: number) => void
@@ -58,6 +72,10 @@ http.interceptors.response.use(
   (error: AxiosError<ApiError>) => {
     const status = error.response?.status
     const body = error.response?.data
+    if (body?.code === 'IP_NOT_ALLOWED' && onIpBlocked) {
+      onIpBlocked(body.clientIp)
+      return Promise.reject(error)
+    }
     if (status && body?.code && onAuthFailure) {
       // 세션 만료(401) 또는 비밀번호 변경 필요(403 PASSWORD_CHANGE_REQUIRED)
       if ((status === 401 && body.code === 'UNAUTHORIZED') || body.code === 'PASSWORD_CHANGE_REQUIRED') {

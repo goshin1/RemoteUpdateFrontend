@@ -6,20 +6,58 @@ import type { AllowedIp, AllowedIpOverview } from '@/api/types'
 import { formatDateTime } from '@/utils/format'
 
 /**
- * 관리 기능 허용 IP (관리자).
+ * 사이트 접속 허용 IP (관리자).
  *
- * IP 제한이 켜져 있으면(서버 설정 IP_FILTER_ENABLED=true) 아래 요청은 여기 등록된 IP 에서만 됩니다.
- * - 데이터 변경: 업데이트·가이드·프로젝트 등록·수정·배포 중단, 사용자 관리
- * - 관리자 메뉴 전체 (이 화면 포함)
- * 로그인·조회·다운로드는 어디서나 됩니다.
+ * IP 제한이 켜져 있으면(서버 설정 IP_FILTER_ENABLED=true) 여기 등록된 IP 에서만 사이트에 접속할 수 있습니다.
+ * 그 외 IP 는 로그인 화면 대신 "허용되지 않은 IP입니다." + 현재 접속 IP 만 보입니다.
+ * - 사무실: 상시 등록
+ * - 현장 지원: 현장 직원이 전화로 알려 준 IP 를 만료 시간을 정해 임시 등록 → 지원이 끝나면 삭제
  *
  * 스스로 잠기지 않도록, 지금 접속한 IP 를 막게 되는 끄기·삭제는 서버가 거부합니다.
  */
+type ExpiryOption = '2h' | 'today' | 'always'
+
+const EXPIRY_LABEL: Record<ExpiryOption, string> = {
+  '2h': '2시간',
+  today: '오늘까지',
+  always: '상시',
+}
+
 const overview = ref<AllowedIpOverview | null>(null)
-const form = reactive({ ipOrCidr: '', description: '' })
+const form = reactive<{ ipOrCidr: string; description: string; expiry: ExpiryOption }>({
+  ipOrCidr: '',
+  description: '',
+  expiry: 'today',
+})
 const error = ref('')
 const notice = ref('')
 const saving = ref(false)
+
+/** 서버는 시간대 없는 로컬 시각(LocalDateTime)을 받으므로 "2026-10-17T18:00:00" 형식으로 만든다 (toISOString 은 UTC 라 쓰지 않음) */
+function toLocalDateTime(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+function expiresAtOf(option: ExpiryOption): string | null {
+  const now = new Date()
+  if (option === '2h') return toLocalDateTime(new Date(now.getTime() + 2 * 60 * 60 * 1000))
+  if (option === 'today') {
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 0)
+    return toLocalDateTime(end)
+  }
+  return null
+}
+
+/** 남은 시간 표시 (예: "1시간 20분 남음") */
+function remaining(item: AllowedIp): string {
+  if (!item.expiresAt || item.expired) return ''
+  const minutes = Math.max(0, Math.round((new Date(item.expiresAt).getTime() - Date.now()) / 60000))
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? `${h}시간 ${m}분 남음` : `${m}분 남음`
+}
 
 async function load() {
   try {
@@ -34,8 +72,12 @@ async function add() {
   notice.value = ''
   saving.value = true
   try {
-    const added = await allowedIpApi.add({ ipOrCidr: form.ipOrCidr.trim(), description: form.description.trim() })
-    notice.value = `${added.ipOrCidr} 을(를) 등록했습니다.`
+    const added = await allowedIpApi.add({
+      ipOrCidr: form.ipOrCidr.trim(),
+      description: form.description.trim(),
+      expiresAt: expiresAtOf(form.expiry),
+    })
+    notice.value = `${added.ipOrCidr} 을(를) ${EXPIRY_LABEL[form.expiry]} 허용으로 등록했습니다.`
     form.ipOrCidr = ''
     form.description = ''
     await load()
@@ -60,8 +102,25 @@ async function toggle(item: AllowedIp) {
   }
 }
 
+/** 기간 변경 (연장·상시 전환). select 에서 고르면 바로 적용하고 선택을 되돌린다 */
+async function changeExpiry(item: AllowedIp, event: Event) {
+  const select = event.target as HTMLSelectElement
+  const option = select.value as ExpiryOption | ''
+  select.value = ''
+  if (!option) return
+  error.value = ''
+  notice.value = ''
+  try {
+    await allowedIpApi.changeExpiresAt(item.id, expiresAtOf(option))
+    notice.value = `${item.ipOrCidr} 을(를) ${EXPIRY_LABEL[option]} 허용으로 바꿨습니다.`
+    await load()
+  } catch (e) {
+    error.value = errorMessage(e)
+  }
+}
+
 async function remove(item: AllowedIp) {
-  if (!window.confirm(`${item.ipOrCidr} 을(를) 삭제할까요?`)) return
+  if (!window.confirm(`${item.ipOrCidr} 을(를) 삭제할까요? 이 IP 는 바로 접속할 수 없게 됩니다.`)) return
   error.value = ''
   try {
     await allowedIpApi.remove(item.id)
@@ -82,7 +141,7 @@ onMounted(load)
   <div class="page-header">
     <div>
       <h1>허용 IP</h1>
-      <p class="muted">등록·수정 같은 관리 기능을 쓸 수 있는 접속 위치(사무실 등)를 관리합니다. 조회·다운로드는 어디서나 됩니다.</p>
+      <p class="muted">이 사이트에 접속할 수 있는 위치를 관리합니다. 사무실은 상시, 현장 지원은 기간을 정해 등록하고 지원이 끝나면 삭제하세요.</p>
     </div>
   </div>
 
@@ -97,13 +156,13 @@ onMounted(load)
       <div>
         <span class="muted label">내 접속 IP</span>
         <code>{{ overview.clientIp }}</code>
-        <span v-if="overview.clientAllowed" class="badge badge-success">관리 가능</span>
-        <span v-else class="badge badge-danger">관리 불가</span>
+        <span v-if="overview.clientAllowed" class="badge badge-success">허용</span>
+        <span v-else class="badge badge-danger">차단 대상</span>
       </div>
     </div>
     <div v-if="!overview.filterEnabled" class="alert alert-info">
-      지금은 IP 제한이 꺼져 있어 모든 위치에서 관리 기능을 쓸 수 있습니다.
-      사무실 IP 를 먼저 등록한 뒤, 서버를 <code>IP_FILTER_ENABLED=true</code> 로 다시 시작하면 적용됩니다.
+      지금은 IP 제한이 꺼져 있어 모든 위치에서 접속할 수 있습니다.
+      사무실 IP 를 먼저 <strong>상시</strong>로 등록한 뒤, 서버를 <code>IP_FILTER_ENABLED=true</code> 로 다시 시작하면 적용됩니다.
     </div>
     <div v-if="overview.alwaysAllowLocalhost" class="hint muted">
       서버 PC 자신(127.0.0.1)에서 접속하면 항상 허용됩니다 — 허용 IP 를 잘못 지웠을 때 복구용.
@@ -124,7 +183,17 @@ onMounted(load)
       </div>
       <div class="field">
         <label for="desc">설명</label>
-        <input id="desc" v-model="form.description" placeholder="예: 본사 사무실" maxlength="200" />
+        <input id="desc" v-model="form.description" placeholder="예: 본사 사무실, OO병원 현장 지원" maxlength="200" />
+      </div>
+      <div class="field">
+        <span class="label-text">허용 기간</span>
+        <div class="expiry-options" role="radiogroup" aria-label="허용 기간">
+          <label v-for="(label, key) in EXPIRY_LABEL" :key="key" class="expiry-option">
+            <input v-model="form.expiry" type="radio" name="expiry" :value="key" />
+            {{ label }}
+          </label>
+        </div>
+        <span class="hint">현장 지원은 "2시간" 또는 "오늘까지", 사무실은 "상시". 기간이 지나면 자동으로 막힙니다.</span>
       </div>
       <div class="actions">
         <button type="submit" class="btn btn-primary" :disabled="saving">{{ saving ? '등록 중...' : '등록' }}</button>
@@ -142,6 +211,7 @@ onMounted(load)
               <th>IP / CIDR</th>
               <th>설명</th>
               <th>상태</th>
+              <th>허용 기간</th>
               <th>등록</th>
               <th><span class="sr-only">관리</span></th>
             </tr>
@@ -151,12 +221,26 @@ onMounted(load)
               <td><code>{{ item.ipOrCidr }}</code></td>
               <td class="wrap">{{ item.description || '-' }}</td>
               <td>
-                <span v-if="item.enabled" class="badge badge-success">사용</span>
-                <span v-else class="badge badge-neutral">중지</span>
+                <span v-if="!item.enabled" class="badge badge-neutral">중지</span>
+                <span v-else-if="item.expired" class="badge badge-danger">만료</span>
+                <span v-else class="badge badge-success">사용</span>
+              </td>
+              <td>
+                <template v-if="item.expiresAt">
+                  {{ formatDateTime(item.expiresAt) }}까지
+                  <span v-if="!item.expired" class="muted remain">{{ remaining(item) }}</span>
+                </template>
+                <span v-else>상시</span>
               </td>
               <td>{{ item.createdByName ?? '-' }} · {{ formatDateTime(item.createdAt) }}</td>
               <td>
                 <div class="row-actions">
+                  <select class="expiry-select" aria-label="허용 기간 변경" @change="changeExpiry(item, $event)">
+                    <option value="">기간 변경</option>
+                    <option value="2h">지금부터 2시간</option>
+                    <option value="today">오늘까지</option>
+                    <option value="always">상시</option>
+                  </select>
                   <button type="button" class="btn btn-sm" @click="toggle(item)">{{ item.enabled ? '중지' : '사용' }}</button>
                   <button type="button" class="btn btn-sm danger" @click="remove(item)">삭제</button>
                 </div>
@@ -225,6 +309,36 @@ onMounted(load)
   display: flex;
   gap: 6px;
   justify-content: flex-end;
+}
+
+.label-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.expiry-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.expiry-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.remain {
+  display: block;
+  font-size: 12px;
+}
+
+.expiry-select {
+  width: auto;
+  padding: 4px 8px;
+  font-size: 13px;
 }
 
 .btn.danger:not(:disabled) {

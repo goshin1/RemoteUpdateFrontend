@@ -8,6 +8,8 @@ export type HistoryAction = 'CREATE' | 'UPDATE' | 'DISABLE' | 'ENABLE'
 export interface ApiError {
   code: string
   message: string
+  /** IP_NOT_ALLOWED 응답일 때 서버가 본 접속 IP */
+  clientIp?: string
 }
 
 export interface PageResponse<T> {
@@ -26,7 +28,7 @@ export interface Me {
   mustChangePassword: boolean
   /** 서버가 본 접속 IP */
   clientIp: string
-  /** 지금 IP 에서 관리 기능(등록·수정·관리자 메뉴)을 쓸 수 있는지 */
+  /** 지금 IP 가 허용되는지 (사이트 전체 IP 제한 이후에는 이 응답을 받았다면 항상 true) */
   managementAllowed: boolean
 }
 
@@ -138,6 +140,10 @@ export interface AllowedIp {
   ipOrCidr: string
   description: string | null
   enabled: boolean
+  /** 만료 시각 (null = 상시) */
+  expiresAt: string | null
+  /** 만료 시각이 지났는지 */
+  expired: boolean
   createdByName: string | null
   createdAt: string
 }
